@@ -1,21 +1,19 @@
-/*
- * LiquidCrystal.c - LiquidCrystal Library for STM32 ARM microcontrollers
+/******************************************************************************************************
  *
- *  Created on: April 12, 2018
- *      Author: S. Saeed Hosseini (sayidhosseini@hotmail.com)
- *      Ported from: Arduino, Adafruit (https://github.com/arduino-libraries/LiquidCrystal)
- *      Published to: Github (https://github.com/SayidHosseini/STM32LiquidCrystal)
- */
+ * The code was made with the help of library (Link: https://github.com/SayidHosseini/STM32LiquidCrystal)
+ * as there was some issues with my LCD drivers.
+ * I do not claim to have written all of the below code but i have modified or removed some used functions.
+ * As well as went trough how it works as just copying code is a bad idea.
+ *
+ *******************************************************************************************************/
 
-#include "stm32f4xx_hal.h" // change this line accordingly
+#include "stm32f4xx_hal.h"
 #include "LiquidCrystal.h"
 #include <stdio.h>
 #include <string.h>
 
-// change this to 0 if you want to use 8-bit mode
 uint8_t _fourbit_mode = 1;
 
-// change this to LCD_5x10DOTS for some 1 line displays that can select a 10 pixel high font
 uint8_t dotsize = LCD_5x8DOTS;
 
 // pin definitions and other LCD variables
@@ -77,7 +75,6 @@ void begin(uint8_t cols, uint8_t lines) {
 
   setRowOffsets(0x00, 0x40, 0x00 + cols, 0x40 + cols);  
 
-  // for some 1 line displays you can select a 10 pixel high font
   if ((dotsize != LCD_5x8DOTS) && (lines == 1)) {
     _displayfunction |= LCD_5x10DOTS;
   }
@@ -97,9 +94,6 @@ void begin(uint8_t cols, uint8_t lines) {
 
   HAL_GPIO_Init(_port, &gpio_init);
 
-  // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
-  // according to datasheet, we need at least 40ms after power rises above 2.7V
-  // so we'll wait 50 just to make sure
   HAL_Delay(50); 
 
   // Now we pull both RS and R/W low to begin commands
@@ -110,10 +104,7 @@ void begin(uint8_t cols, uint8_t lines) {
     HAL_GPIO_WritePin(_port, _rw_pin, GPIO_PIN_RESET);
   }
   
-  //put the LCD into 4 bit or 8 bit mode
   if (! (_displayfunction & LCD_8BITMODE)) {
-    // this is according to the hitachi HD44780 datasheet
-    // figure 24, pg 46
 
     // we start in 8bit mode, try to set 4 bit mode
     write4bits(0x03);
@@ -130,39 +121,28 @@ void begin(uint8_t cols, uint8_t lines) {
     // finally, set to 4-bit interface
     write4bits(0x02); 
   } else {
-    // this is according to the hitachi HD44780 datasheet
-    // page 45 figure 23
 
-    // Send function set command sequence
     command(LCD_FUNCTIONSET | _displayfunction);
     HAL_Delay(5);  // wait more than 4.1ms
 
-    // second try
     command(LCD_FUNCTIONSET | _displayfunction);
     HAL_Delay(1);
 
-    // third go
     command(LCD_FUNCTIONSET | _displayfunction);
   }
 
-  // finally, set # lines, font size, etc.
   command(LCD_FUNCTIONSET | _displayfunction);  
 
-  // turn the display on with no cursor or blinking default
   _displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;  
   display();
 
-  // clear it off
   clear();
 
-  // Initialize to default text direction (for romance languages)
   _displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
-  // set the entry mode
   command(LCD_ENTRYMODESET | _displaymode);
 
 }
 
-// enables GPIO RCC Clock
 void enableClock(void)
 {  
   if(_port == GPIOA)
@@ -179,8 +159,6 @@ void enableClock(void)
 		__HAL_RCC_GPIOE_CLK_ENABLE();
 	else if(_port == GPIOF)
 		__HAL_RCC_GPIOF_CLK_ENABLE();
-
-  // if you have a port that is not listed add it below the other else ifs
 }
 
 void setRowOffsets(int row0, int row1, int row2, int row3)
@@ -190,34 +168,26 @@ void setRowOffsets(int row0, int row1, int row2, int row3)
   _row_offsets[2] = row2;
   _row_offsets[3] = row3;
 }
-
-/********** high level commands, for the user! */
 void clear(void)
 {
-  command(LCD_CLEARDISPLAY);  // clear display, set cursor position to zero
-  HAL_Delay(2);  // this command takes a long time!
-}
-
-void home(void)
-{
-  command(LCD_RETURNHOME);  // set cursor position to zero
-  HAL_Delay(2);  // this command takes a long time!
+  command(LCD_CLEARDISPLAY);
+  HAL_Delay(2);
 }
 
 void setCursor(uint8_t col, uint8_t row)
 {
   const size_t max_lines = sizeof(_row_offsets) / sizeof(*_row_offsets);
   if ( row >= max_lines ) {
-    row = max_lines - 1;    // we count rows starting w/0
+    row = max_lines - 1;
   }
   if ( row >= _numlines ) {
-    row = _numlines - 1;    // we count rows starting w/0
+    row = _numlines - 1;
   }
   
   command(LCD_SETDDRAMADDR | (col + _row_offsets[row]));
 }
 
-// Turn the display on/off (quickly)
+// Turn the display on/off
 void noDisplay(void) {
   _displaycontrol &= ~LCD_DISPLAYON;
   command(LCD_DISPLAYCONTROL | _displaycontrol);
@@ -225,58 +195,6 @@ void noDisplay(void) {
 void display(void) {
   _displaycontrol |= LCD_DISPLAYON;
   command(LCD_DISPLAYCONTROL | _displaycontrol);
-}
-
-// Turns the underline cursor on/off
-void noCursor(void) {
-  _displaycontrol &= ~LCD_CURSORON;
-  command(LCD_DISPLAYCONTROL | _displaycontrol);
-}
-void cursor(void) {
-  _displaycontrol |= LCD_CURSORON;
-  command(LCD_DISPLAYCONTROL | _displaycontrol);
-}
-
-// Turn on and off the blinking cursor
-void noBlink(void) {
-  _displaycontrol &= ~LCD_BLINKON;
-  command(LCD_DISPLAYCONTROL | _displaycontrol);
-}
-void blink(void) {
-  _displaycontrol |= LCD_BLINKON;
-  command(LCD_DISPLAYCONTROL | _displaycontrol);
-}
-
-// These commands scroll the display without changing the RAM
-void scrollDisplayLeft(void) {
-  command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT);
-}
-void scrollDisplayRight(void) {
-  command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT);
-}
-
-// This is for text that flows Left to Right
-void leftToRight(void) {
-  _displaymode |= LCD_ENTRYLEFT;
-  command(LCD_ENTRYMODESET | _displaymode);
-}
-
-// This is for text that flows Right to Left
-void rightToLeft(void) {
-  _displaymode &= ~LCD_ENTRYLEFT;
-  command(LCD_ENTRYMODESET | _displaymode);
-}
-
-// This will 'right justify' text from the cursor
-void autoscroll(void) {
-  _displaymode |= LCD_ENTRYSHIFTINCREMENT;
-  command(LCD_ENTRYMODESET | _displaymode);
-}
-
-// This will 'left justify' text from the cursor
-void noAutoscroll(void) {
-  _displaymode &= ~LCD_ENTRYSHIFTINCREMENT;
-  command(LCD_ENTRYMODESET | _displaymode);
 }
 
 // This will print character string to the LCD
@@ -294,30 +212,16 @@ size_t print(const char str[]) {
   return n;
 }
 
-// Allows us to fill the first 8 CGRAM locations
-// with custom characters
-void createChar(uint8_t location, uint8_t charmap[]) {
-  location &= 0x7; // we only have 8 locations 0-7
-  command(LCD_SETCGRAMADDR | (location << 3));
-  for (int i=0; i<8; i++) {
-    write(charmap[i]);
-  }
-}
-
-/*********** mid level commands, for sending data/cmds */
-
 inline void command(uint8_t value) {
   send(value, GPIO_PIN_RESET);
 }
 
 inline size_t write(uint8_t value) {
   send(value, GPIO_PIN_SET);
-  return 1; // assume sucess
+  return 1;
 }
 
-/************ low level data pushing commands **********/
 
-// write either command or data, with automatic 4/8-bit selection
 void send(uint8_t value, GPIO_PinState mode) {
   HAL_GPIO_WritePin(_port, _rs_pin, mode);
 

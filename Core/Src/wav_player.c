@@ -52,7 +52,6 @@
 static int uwVolume = 85;
 
 
-/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NO CHANGES AFTER THIS <<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 #define OUTPUT_DEVICE_SPEAKER         1
 #define OUTPUT_DEVICE_HEADPHONE       2
 #define OUTPUT_DEVICE_BOTH            3
@@ -71,10 +70,8 @@ WAVE_FormatTypeDef WaveFormat;
 
 FIL WavFile;
 
-/* Private function prototypes -----------------------------------------------*/
 uint8_t PlayerInit(uint32_t AudioFreq)
 {
-	/* Initialize the Audio codec and all related peripherals (I2S, I2C, IOExpander, IOs...) */
 	if(AUDIO_OUT_Init(OUTPUT_DEVICE_BOTH, uwVolume, AudioFreq) != 0)
 	{
 		return 1;
@@ -94,11 +91,7 @@ int getVol()
 {
 	return uwVolume;
 }
-/**
-  * @brief  Starts Audio streaming.
-  * @param  idx: File index
-  * @retval Audio error
-  */
+
 AUDIO_ErrorTypeDef AUDIO_PLAYER_Start(uint8_t idx)
 {
   uint bytesread;
@@ -108,7 +101,7 @@ AUDIO_ErrorTypeDef AUDIO_PLAYER_Start(uint8_t idx)
   {
     //Open WAV file
     f_open(&WavFile, (char *)FileList.file[idx].name, FA_READ);
-    //Read WAV file Header
+
     f_read(&WavFile, &WaveFormat, sizeof(WaveFormat), &bytesread);
 
     /*Adjust the Audio frequency */
@@ -119,7 +112,6 @@ AUDIO_ErrorTypeDef AUDIO_PLAYER_Start(uint8_t idx)
     /* Get Data from USB Flash Disk */
     f_lseek(&WavFile, 0);
 
-    /* Fill whole buffer at first time */
     if(f_read(&WavFile,&BufferCtl.buff[0],AUDIO_OUT_BUFFER_SIZE,(void *)&bytesread) == FR_OK)
     {
       AudioState = AUDIO_STATE_PLAY;
@@ -134,11 +126,7 @@ AUDIO_ErrorTypeDef AUDIO_PLAYER_Start(uint8_t idx)
   return AUDIO_ERROR_IO;
 }
 
-/**
-  * @brief  Manages Audio process.
-  * @param  None
-  * @retval Audio error
-  */
+
 AUDIO_ErrorTypeDef AUDIO_PLAYER_Process(bool isLoop)
 {
   uint32_t bytesread;
@@ -219,7 +207,7 @@ AUDIO_ErrorTypeDef AUDIO_PLAYER_Process(bool isLoop)
     break;
 
   case AUDIO_STATE_VOLUME_UP:
-    if( uwVolume <= 99/)
+    if( uwVolume <= 99)
     {
       uwVolume += 1;
     }
@@ -240,7 +228,6 @@ AUDIO_ErrorTypeDef AUDIO_PLAYER_Process(bool isLoop)
   case AUDIO_STATE_IDLE:
   case AUDIO_STATE_INIT:
   default:
-    /* Do Nothing */
     break;
   }
   return audio_error;

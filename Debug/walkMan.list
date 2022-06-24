@@ -29,23 +29,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  12 .ARM.attributes 00000030  00000000  00000000  000300d4  2**0
                   CONTENTS, READONLY
- 13 .debug_info   00032e43  00000000  00000000  00030104  2**0
+ 13 .debug_info   00032d1b  00000000  00000000  00030104  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 00006939  00000000  00000000  00062f47  2**0
+ 14 .debug_abbrev 000068f0  00000000  00000000  00062e1f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 000019b8  00000000  00000000  00069880  2**3
+ 15 .debug_aranges 00001958  00000000  00000000  00069710  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_ranges 00001788  00000000  00000000  0006b238  2**3
+ 16 .debug_ranges 00001728  00000000  00000000  0006b068  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  000288ef  00000000  00000000  0006c9c0  2**0
+ 17 .debug_macro  000288ef  00000000  00000000  0006c790  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00028128  00000000  00000000  000952af  2**0
+ 18 .debug_line   00027fc1  00000000  00000000  0009507f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000cf0e4  00000000  00000000  000bd3d7  2**0
+ 19 .debug_str    000cf04e  00000000  00000000  000bd040  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000053  00000000  00000000  0018c4bb  2**0
+ 20 .comment      00000053  00000000  00000000  0018c08e  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  00006c78  00000000  00000000  0018c510  2**2
+ 21 .debug_frame  00006b20  00000000  00000000  0018c0e4  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -2219,7 +2219,6 @@ void begin(uint8_t cols, uint8_t lines) {
  8000fd6:	2000      	movs	r0, #0
  8000fd8:	f000 f998 	bl	800130c <setRowOffsets>
 
-  // for some 1 line displays you can select a 10 pixel high font
   if ((dotsize != LCD_5x8DOTS) && (lines == 1)) {
  8000fdc:	4b70      	ldr	r3, [pc, #448]	; (80011a0 <begin+0x1fc>)
  8000fde:	781b      	ldrb	r3, [r3, #0]
@@ -2347,9 +2346,6 @@ void begin(uint8_t cols, uint8_t lines) {
  80010a4:	4618      	mov	r0, r3
  80010a6:	f002 fbcb 	bl	8003840 <HAL_GPIO_Init>
 
-  // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
-  // according to datasheet, we need at least 40ms after power rises above 2.7V
-  // so we'll wait 50 just to make sure
   HAL_Delay(50); 
  80010aa:	2032      	movs	r0, #50	; 0x32
  80010ac:	f001 fe54 	bl	8002d58 <HAL_Delay>
@@ -2387,15 +2383,12 @@ void begin(uint8_t cols, uint8_t lines) {
  80010e4:	f002 fe44 	bl	8003d70 <HAL_GPIO_WritePin>
   }
   
-  //put the LCD into 4 bit or 8 bit mode
   if (! (_displayfunction & LCD_8BITMODE)) {
  80010e8:	4b2b      	ldr	r3, [pc, #172]	; (8001198 <begin+0x1f4>)
  80010ea:	781b      	ldrb	r3, [r3, #0]
  80010ec:	f003 0310 	and.w	r3, r3, #16
  80010f0:	2b00      	cmp	r3, #0
  80010f2:	d115      	bne.n	8001120 <begin+0x17c>
-    // this is according to the hitachi HD44780 datasheet
-    // figure 24, pg 46
 
     // we start in 8bit mode, try to set 4 bit mode
     write4bits(0x03);
@@ -2427,10 +2420,7 @@ void begin(uint8_t cols, uint8_t lines) {
  800111a:	f000 fa19 	bl	8001550 <write4bits>
  800111e:	e01d      	b.n	800115c <begin+0x1b8>
   } else {
-    // this is according to the hitachi HD44780 datasheet
-    // page 45 figure 23
 
-    // Send function set command sequence
     command(LCD_FUNCTIONSET | _displayfunction);
  8001120:	4b1d      	ldr	r3, [pc, #116]	; (8001198 <begin+0x1f4>)
  8001122:	781b      	ldrb	r3, [r3, #0]
@@ -2442,7 +2432,6 @@ void begin(uint8_t cols, uint8_t lines) {
  8001130:	2005      	movs	r0, #5
  8001132:	f001 fe11 	bl	8002d58 <HAL_Delay>
 
-    // second try
     command(LCD_FUNCTIONSET | _displayfunction);
  8001136:	4b18      	ldr	r3, [pc, #96]	; (8001198 <begin+0x1f4>)
  8001138:	781b      	ldrb	r3, [r3, #0]
@@ -2454,7 +2443,6 @@ void begin(uint8_t cols, uint8_t lines) {
  8001146:	2001      	movs	r0, #1
  8001148:	f001 fe06 	bl	8002d58 <HAL_Delay>
 
-    // third go
     command(LCD_FUNCTIONSET | _displayfunction);
  800114c:	4b12      	ldr	r3, [pc, #72]	; (8001198 <begin+0x1f4>)
  800114e:	781b      	ldrb	r3, [r3, #0]
@@ -2464,7 +2452,6 @@ void begin(uint8_t cols, uint8_t lines) {
  8001158:	f000 f975 	bl	8001446 <command>
   }
 
-  // finally, set # lines, font size, etc.
   command(LCD_FUNCTIONSET | _displayfunction);  
  800115c:	4b0e      	ldr	r3, [pc, #56]	; (8001198 <begin+0x1f4>)
  800115e:	781b      	ldrb	r3, [r3, #0]
@@ -2473,7 +2460,6 @@ void begin(uint8_t cols, uint8_t lines) {
  8001166:	4618      	mov	r0, r3
  8001168:	f000 f96d 	bl	8001446 <command>
 
-  // turn the display on with no cursor or blinking default
   _displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;  
  800116c:	4b13      	ldr	r3, [pc, #76]	; (80011bc <begin+0x218>)
  800116e:	2204      	movs	r2, #4
@@ -2481,16 +2467,13 @@ void begin(uint8_t cols, uint8_t lines) {
   display();
  8001172:	f000 f927 	bl	80013c4 <display>
 
-  // clear it off
   clear();
  8001176:	f000 f8e9 	bl	800134c <clear>
 
-  // Initialize to default text direction (for romance languages)
   _displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
  800117a:	4b11      	ldr	r3, [pc, #68]	; (80011c0 <begin+0x21c>)
  800117c:	2202      	movs	r2, #2
  800117e:	701a      	strb	r2, [r3, #0]
-  // set the entry mode
   command(LCD_ENTRYMODESET | _displaymode);
  8001180:	4b0f      	ldr	r3, [pc, #60]	; (80011c0 <begin+0x21c>)
  8001182:	781b      	ldrb	r3, [r3, #0]
@@ -2518,7 +2501,6 @@ void begin(uint8_t cols, uint8_t lines) {
 
 080011c4 <enableClock>:
 
-// enables GPIO RCC Clock
 void enableClock(void)
 {  
  80011c4:	b480      	push	{r7}
@@ -2543,11 +2525,11 @@ void enableClock(void)
  80011e8:	f003 0301 	and.w	r3, r3, #1
  80011ec:	61fb      	str	r3, [r7, #28]
  80011ee:	69fb      	ldr	r3, [r7, #28]
+		__HAL_RCC_GPIOD_CLK_ENABLE();
+	else if(_port == GPIOE)
 		__HAL_RCC_GPIOE_CLK_ENABLE();
 	else if(_port == GPIOF)
 		__HAL_RCC_GPIOF_CLK_ENABLE();
-
-  // if you have a port that is not listed add it below the other else ifs
 }
  80011f0:	e076      	b.n	80012e0 <enableClock+0x11c>
   else if(_port == GPIOB)
@@ -2730,16 +2712,14 @@ void setRowOffsets(int row0, int row1, int row2, int row3)
  8001348:	20010bc0 	.word	0x20010bc0
 
 0800134c <clear>:
-
-/********** high level commands, for the user! */
 void clear(void)
 {
  800134c:	b580      	push	{r7, lr}
  800134e:	af00      	add	r7, sp, #0
-  command(LCD_CLEARDISPLAY);  // clear display, set cursor position to zero
+  command(LCD_CLEARDISPLAY);
  8001350:	2001      	movs	r0, #1
  8001352:	f000 f878 	bl	8001446 <command>
-  HAL_Delay(2);  // this command takes a long time!
+  HAL_Delay(2);
  8001356:	2002      	movs	r0, #2
  8001358:	f001 fcfe 	bl	8002d58 <HAL_Delay>
 }
@@ -2747,9 +2727,6 @@ void clear(void)
  800135e:	bd80      	pop	{r7, pc}
 
 08001360 <setCursor>:
-  command(LCD_RETURNHOME);  // set cursor position to zero
-  HAL_Delay(2);  // this command takes a long time!
-}
 
 void setCursor(uint8_t col, uint8_t row)
 {
@@ -2769,7 +2746,7 @@ void setCursor(uint8_t col, uint8_t row)
  8001376:	68fa      	ldr	r2, [r7, #12]
  8001378:	429a      	cmp	r2, r3
  800137a:	d803      	bhi.n	8001384 <setCursor+0x24>
-    row = max_lines - 1;    // we count rows starting w/0
+    row = max_lines - 1;
  800137c:	68fb      	ldr	r3, [r7, #12]
  800137e:	b2db      	uxtb	r3, r3
  8001380:	3b01      	subs	r3, #1
@@ -2781,7 +2758,7 @@ void setCursor(uint8_t col, uint8_t row)
  8001388:	79ba      	ldrb	r2, [r7, #6]
  800138a:	429a      	cmp	r2, r3
  800138c:	d303      	bcc.n	8001396 <setCursor+0x36>
-    row = _numlines - 1;    // we count rows starting w/0
+    row = _numlines - 1;
  800138e:	4b0b      	ldr	r3, [pc, #44]	; (80013bc <setCursor+0x5c>)
  8001390:	781b      	ldrb	r3, [r3, #0]
  8001392:	3b01      	subs	r3, #1
@@ -2811,7 +2788,7 @@ void setCursor(uint8_t col, uint8_t row)
  80013c0:	20010bc0 	.word	0x20010bc0
 
 080013c4 <display>:
-// Turn the display on/off (quickly)
+// Turn the display on/off
 void noDisplay(void) {
   _displaycontrol &= ~LCD_DISPLAYON;
   command(LCD_DISPLAYCONTROL | _displaycontrol);
@@ -2840,9 +2817,6 @@ void display(void) {
  80013ec:	20010bcc 	.word	0x20010bcc
 
 080013f0 <print>:
-  _displaymode &= ~LCD_ENTRYSHIFTINCREMENT;
-  command(LCD_ENTRYMODESET | _displaymode);
-}
 
 // This will print character string to the LCD
 size_t print(const char str[]) {
@@ -2902,10 +2876,6 @@ size_t print(const char str[]) {
  8001444:	bd80      	pop	{r7, pc}
 
 08001446 <command>:
-  }
-}
-
-/*********** mid level commands, for sending data/cmds */
 
 inline void command(uint8_t value) {
  8001446:	b580      	push	{r7, lr}
@@ -2937,7 +2907,7 @@ inline size_t write(uint8_t value) {
  800146e:	2101      	movs	r1, #1
  8001470:	4618      	mov	r0, r3
  8001472:	f000 f805 	bl	8001480 <send>
-  return 1; // assume sucess
+  return 1;
  8001476:	2301      	movs	r3, #1
 }
  8001478:	4618      	mov	r0, r3
@@ -2947,9 +2917,7 @@ inline size_t write(uint8_t value) {
 
 08001480 <send>:
 
-/************ low level data pushing commands **********/
 
-// write either command or data, with automatic 4/8-bit selection
 void send(uint8_t value, GPIO_PinState mode) {
  8001480:	b580      	push	{r7, lr}
  8001482:	b082      	sub	sp, #8
@@ -4601,7 +4569,7 @@ int main(void)
  8001e80:	40021000 	.word	0x40021000
  8001e84:	08012688 	.word	0x08012688
  8001e88:	200001b8 	.word	0x200001b8
- 8001e8c:	20010c98 	.word	0x20010c98
+ 8001e8c:	20010c94 	.word	0x20010c94
  8001e90:	20010664 	.word	0x20010664
  8001e94:	200001b4 	.word	0x200001b4
  8001e98:	08012694 	.word	0x08012694
@@ -4810,7 +4778,7 @@ static void MX_I2C1_Init(void)
 }
  8001fd4:	bf00      	nop
  8001fd6:	bd80      	pop	{r7, pc}
- 8001fd8:	20010c44 	.word	0x20010c44
+ 8001fd8:	20010c40 	.word	0x20010c40
  8001fdc:	40005400 	.word	0x40005400
  8001fe0:	000186a0 	.word	0x000186a0
 
@@ -4882,7 +4850,7 @@ static void MX_I2S3_Init(void)
  8002032:	bf00      	nop
  8002034:	bd80      	pop	{r7, pc}
  8002036:	bf00      	nop
- 8002038:	20010e64 	.word	0x20010e64
+ 8002038:	20010e60 	.word	0x20010e60
  800203c:	40003c00 	.word	0x40003c00
 
 08002040 <MX_SPI1_Init>:
@@ -4964,7 +4932,7 @@ static void MX_SPI1_Init(void)
 }
  80020a0:	bf00      	nop
  80020a2:	bd80      	pop	{r7, pc}
- 80020a4:	20010dfc 	.word	0x20010dfc
+ 80020a4:	20010df8 	.word	0x20010df8
  80020a8:	40013000 	.word	0x40013000
 
 080020ac <MX_SPI2_Init>:
@@ -5046,7 +5014,7 @@ static void MX_SPI2_Init(void)
 }
  800210c:	bf00      	nop
  800210e:	bd80      	pop	{r7, pc}
- 8002110:	20010bec 	.word	0x20010bec
+ 8002110:	20010be8 	.word	0x20010be8
  8002114:	40003800 	.word	0x40003800
 
 08002118 <MX_DMA_Init>:
@@ -5766,7 +5734,7 @@ void HAL_I2S_MspInit(I2S_HandleTypeDef* hi2s)
  8002550:	40023800 	.word	0x40023800
  8002554:	40020000 	.word	0x40020000
  8002558:	40020800 	.word	0x40020800
- 800255c:	20010c9c 	.word	0x20010c9c
+ 800255c:	20010c98 	.word	0x20010c98
  8002560:	40026088 	.word	0x40026088
 
 08002564 <HAL_SPI_MspInit>:
@@ -5999,8 +5967,8 @@ void SDTimer_Handler(void)
  80026d8:	f85d 7b04 	ldr.w	r7, [sp], #4
  80026dc:	4770      	bx	lr
  80026de:	bf00      	nop
- 80026e0:	20010bea 	.word	0x20010bea
- 80026e4:	20010be8 	.word	0x20010be8
+ 80026e0:	20010eaa 	.word	0x20010eaa
+ 80026e4:	20010ea8 	.word	0x20010ea8
 
 080026e8 <NMI_Handler>:
 /******************************************************************************/
@@ -6226,7 +6194,7 @@ void DMA1_Stream5_IRQHandler(void)
  800277e:	bf00      	nop
  8002780:	bd80      	pop	{r7, pc}
  8002782:	bf00      	nop
- 8002784:	20010c9c 	.word	0x20010c9c
+ 8002784:	20010c98 	.word	0x20010c98
 
 08002788 <EXTI15_10_IRQHandler>:
 
@@ -6395,17 +6363,16 @@ void SystemInit(void)
  8002850:	e000ed00 	.word	0xe000ed00
 
 08002854 <PlayerInit>:
+WAVE_FormatTypeDef WaveFormat;
 
 FIL WavFile;
 
-/* Private function prototypes -----------------------------------------------*/
 uint8_t PlayerInit(uint32_t AudioFreq)
 {
  8002854:	b580      	push	{r7, lr}
  8002856:	b082      	sub	sp, #8
  8002858:	af00      	add	r7, sp, #0
  800285a:	6078      	str	r0, [r7, #4]
-	/* Initialize the Audio codec and all related peripherals (I2S, I2C, IOExpander, IOs...) */
 	if(AUDIO_OUT_Init(OUTPUT_DEVICE_BOTH, uwVolume, AudioFreq) != 0)
  800285c:	4b08      	ldr	r3, [pc, #32]	; (8002880 <PlayerInit+0x2c>)
  800285e:	681b      	ldr	r3, [r3, #0]
@@ -6479,10 +6446,7 @@ int getVol()
  80028c8:	20000044 	.word	0x20000044
 
 080028cc <AUDIO_PLAYER_Start>:
-  * @brief  Starts Audio streaming.
-  * @param  idx: File index
-  * @retval Audio error
-  */
+
 AUDIO_ErrorTypeDef AUDIO_PLAYER_Start(uint8_t idx)
 {
  80028cc:	b580      	push	{r7, lr}
@@ -6519,7 +6483,7 @@ AUDIO_ErrorTypeDef AUDIO_PLAYER_Start(uint8_t idx)
  8002900:	4619      	mov	r1, r3
  8002902:	481f      	ldr	r0, [pc, #124]	; (8002980 <AUDIO_PLAYER_Start+0xb4>)
  8002904:	f00d fbe8 	bl	80100d8 <f_open>
-    //Read WAV file Header
+
     f_read(&WavFile, &WaveFormat, sizeof(WaveFormat), &bytesread);
  8002908:	f107 030c 	add.w	r3, r7, #12
  800290c:	222c      	movs	r2, #44	; 0x2c
@@ -6547,7 +6511,6 @@ AUDIO_ErrorTypeDef AUDIO_PLAYER_Start(uint8_t idx)
  8002932:	4813      	ldr	r0, [pc, #76]	; (8002980 <AUDIO_PLAYER_Start+0xb4>)
  8002934:	f00e f955 	bl	8010be2 <f_lseek>
 
-    /* Fill whole buffer at first time */
     if(f_read(&WavFile,&BufferCtl.buff[0],AUDIO_OUT_BUFFER_SIZE,(void *)&bytesread) == FR_OK)
  8002938:	f107 030c 	add.w	r3, r7, #12
  800293c:	f44f 3280 	mov.w	r2, #65536	; 0x10000
@@ -6598,10 +6561,8 @@ AUDIO_ErrorTypeDef AUDIO_PLAYER_Start(uint8_t idx)
  8002990:	20010eb0 	.word	0x20010eb0
 
 08002994 <AUDIO_PLAYER_Process>:
-  * @brief  Manages Audio process.
-  * @param  None
-  * @retval Audio error
-  */
+
+
 AUDIO_ErrorTypeDef AUDIO_PLAYER_Process(bool isLoop)
 {
  8002994:	b590      	push	{r4, r7, lr}
@@ -6913,11 +6874,11 @@ AUDIO_ErrorTypeDef AUDIO_PLAYER_Process(bool isLoop)
  8002ba0:	701a      	strb	r2, [r3, #0]
     break;
  8002ba2:	e002      	b.n	8002baa <AUDIO_PLAYER_Process+0x216>
+
   case AUDIO_STATE_WAIT:
   case AUDIO_STATE_IDLE:
   case AUDIO_STATE_INIT:
   default:
-    /* Do Nothing */
     break;
  8002ba4:	bf00      	nop
  8002ba6:	e000      	b.n	8002baa <AUDIO_PLAYER_Process+0x216>
