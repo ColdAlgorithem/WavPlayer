@@ -1,0 +1,8 @@
+wav_player.c:75:9:PlayerInit	16	static
+wav_player.c:88:7:getFileName	4	static
+wav_player.c:93:5:getVol	4	static
+wav_player.c:102:20:AUDIO_PLAYER_Start	24	static
+wav_player.c:142:20:AUDIO_PLAYER_Process	32	static
+wav_player.c:254:20:AUDIO_PLAYER_Stop	8	static
+wav_player.c:269:6:AUDIO_OUT_TransferComplete_CallBack	4	static
+wav_player.c:282:6:AUDIO_OUT_HalfTransfer_CallBack	4	static

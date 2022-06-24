@@ -1,0 +1,9 @@
+AUDIO_LINK.c:67:13:I2Cx_Init	8	static
+AUDIO_LINK.c:93:13:I2Cx_WriteData	40	static
+AUDIO_LINK.c:113:16:I2Cx_ReadData	40	static
+AUDIO_LINK.c:132:13:I2Cx_Error	8	static
+AUDIO_LINK.c:145:13:I2Cx_MspInit	48	static
+AUDIO_LINK.c:189:6:AUDIO_IO_Init	32	static
+AUDIO_LINK.c:221:6:AUDIO_IO_DeInit	4	static
+AUDIO_LINK.c:232:6:AUDIO_IO_Write	16	static
+AUDIO_LINK.c:243:9:AUDIO_IO_Read	16	static
